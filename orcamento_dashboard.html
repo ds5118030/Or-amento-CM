@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Controle Orçamentário — Diretoria Comercial 2026</title>
+<style>
+  :root{--bg:#0f1117;--surface:#181c27;--surface2:#1e2336;--border:#2a3050;--accent:#4f7af8;--green:#22c55e;--red:#ef4444;--amber:#f59e0b;--text:#e8eaf0;--muted:#8891a8;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:system-ui,sans-serif;font-size:13px;}
+  .hdr{display:flex;align-items:center;justify-content:space-between;padding:12px 20px;border-bottom:1px solid var(--border);background:var(--surface);}
+  .hdr-title{font-size:15px;font-weight:700;}
+  .hdr-sub{font-size:11px;color:var(--muted);margin-top:2px;display:flex;align-items:center;gap:6px;}
+  .dot{width:8px;height:8px;border-radius:50%;background:var(--green);display:inline-block;}
+  .hdr-actions{display:flex;gap:8px;}
+  .btn{padding:6px 14px;border-radius:6px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:12px;font-weight:500;cursor:pointer;}
+  .btn:hover{border-color:var(--accent);}
+  .btn-primary{background:var(--accent);border-color:var(--accent);color:#fff;}
+  .month-strip{display:flex;border-bottom:1px solid var(--border);overflow-x:auto;background:var(--surface);}
+  .month-tab{min-width:85px;padding:9px 10px;text-align:center;cursor:pointer;border-right:1px solid var(--border);border-bottom:3px solid transparent;flex:1;}
+  .month-tab:hover{background:var(--surface2);}
+  .month-tab.active{border-bottom-color:var(--accent);background:var(--surface2);}
+  .month-tab.future{opacity:.45;}
+  .mtname{font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;}
+  .month-tab.active .mtname{color:var(--accent);}
+  .mtsaldo{font-size:13px;font-weight:700;margin-top:2px;}
+  .mtpct{font-size:10px;color:var(--muted);margin-top:1px;}
+  .main{display:flex;height:calc(100vh - 104px);overflow:hidden;}
+  .left-panel{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+  .filters-bar{display:flex;align-items:center;gap:10px;padding:7px 14px;border-bottom:1px solid var(--border);background:var(--surface);flex-shrink:0;}
+  .filter-select,.search-input{background:var(--surface2);border:1px solid var(--border);border-radius:5px;color:var(--text);padding:4px 10px;font-size:11px;}
+  .search-input{width:180px;}
+  .ml-auto{margin-left:auto;}
+  .table-panel{flex:1;overflow:auto;}
+  table{width:100%;border-collapse:collapse;font-size:12px;}
+  thead{position:sticky;top:0;z-index:10;}
+  thead tr{background:var(--surface2);}
+  th{padding:9px 12px;text-align:right;font-weight:600;font-size:11px;color:var(--muted);letter-spacing:.04em;text-transform:uppercase;border-bottom:2px solid var(--border);white-space:nowrap;}
+  th:first-child{text-align:left;min-width:230px;position:sticky;left:0;background:var(--surface2);z-index:11;}
+  td{padding:8px 12px;border-bottom:1px solid #1a1f30;text-align:right;white-space:nowrap;}
+  td:first-child{text-align:left;position:sticky;left:0;background:var(--bg);z-index:5;}
+  tr:hover td{background:var(--surface2);}
+  tr:hover td:first-child{background:var(--surface2);}
+  .row-group td{padding:5px 12px;background:var(--surface)!important;font-weight:700;font-size:10px;color:var(--muted);letter-spacing:.07em;text-transform:uppercase;border-top:1px solid var(--border);}
+  .row-total td{font-weight:700;font-size:13px;border-top:2px solid var(--accent);background:var(--bg)!important;}
+  .val-pos{color:var(--green);}.val-neg{color:var(--red);}.val-warn{color:var(--amber);}.val-zero{color:var(--muted);}
+  .excesso-tag{display:inline-block;font-size:9px;padding:1px 5px;border-radius:3px;background:#3b1515;color:var(--red);font-weight:700;margin-left:4px;}
+  .atencao-tag{display:inline-block;font-size:9px;padding:1px 5px;border-radius:3px;background:#2e200a;color:var(--amber);font-weight:700;margin-left:4px;}
+  .saldo-panel{width:310px;border-left:1px solid var(--border);overflow-y:auto;background:var(--surface);flex-shrink:0;}
+  .saldo-panel-hdr{padding:13px 15px 9px;border-bottom:1px solid var(--border);}
+  .sph-title{font-size:13px;font-weight:700;}
+  .sph-month{font-size:11px;color:var(--muted);margin-top:1px;}
+  .saldo-big{padding:15px;border-bottom:1px solid var(--border);}
+  .sb-label{font-size:10px;color:var(--muted);font-weight:600;letter-spacing:.05em;text-transform:uppercase;}
+  .sb-value{font-size:24px;font-weight:700;margin-top:4px;}
+  .sb-row{display:flex;justify-content:space-between;margin-top:5px;font-size:12px;}
+  .kpi-row{display:flex;border-bottom:1px solid var(--border);}
+  .kpi{flex:1;padding:10px 13px;border-right:1px solid var(--border);}
+  .kpi:last-child{border-right:none;}
+  .kpi-label{font-size:10px;color:var(--muted);font-weight:600;letter-spacing:.04em;text-transform:uppercase;}
+  .kpi-val{font-size:14px;font-weight:700;margin-top:3px;}
+  .detail-section{padding:12px 15px;}
+  .ds-title{font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;margin-bottom:8px;}
+  .detail-item{display:flex;justify-content:space-between;align-items:flex-start;padding:6px 0;border-bottom:1px solid #1a1f30;gap:8px;}
+  .detail-item:last-child{border-bottom:none;}
+  .di-name{font-size:11px;font-weight:500;line-height:1.3;flex:1;}
+  .di-meta{text-align:right;}
+  .di-saldo{font-size:12px;font-weight:700;}
+  .di-pct{font-size:10px;color:var(--muted);}
+  .di-bar-wrap{width:100%;height:3px;background:var(--border);border-radius:2px;margin-top:3px;}
+  .di-bar{height:100%;border-radius:2px;}
+  .insight-box{margin:12px 15px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:11px;}
+  .ib-title{font-size:11px;font-weight:700;color:var(--accent);margin-bottom:7px;}
+  .ib-item{font-size:11px;color:var(--muted);margin-bottom:4px;padding-left:10px;position:relative;}
+  .ib-item::before{content:"▸";position:absolute;left:0;color:var(--accent);}
+  .ib-item strong{color:var(--text);}
+  .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:100;align-items:center;justify-content:center;}
+  .modal.open{display:flex;}
+  .modal-box{background:var(--surface);border:1px solid var(--border);border-radius:12px;width:560px;max-width:95vw;max-height:85vh;overflow:hidden;display:flex;flex-direction:column;}
+  .modal-hdr{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;font-size:14px;font-weight:700;}
+  .modal-body{padding:16px 18px;overflow-y:auto;flex:1;}
+  .modal-close{cursor:pointer;color:var(--muted);font-size:18px;}
+  textarea{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:8px 12px;font-size:11px;font-family:monospace;resize:vertical;min-height:120px;margin-top:6px;}
+  textarea:focus{outline:none;border-color:var(--accent);}
+  ::-webkit-scrollbar{width:5px;height:5px;}
+  ::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div>
+    <div class="hdr-title">Controle Orçamentário — Diretoria Comercial</div>
+    <div class="hdr-sub"><span class="dot"></span><span id="dataInfo">Forecast 2026 · Template YTD · Base: 16/09/2026</span></div>
+  </div>
+  <div class="hdr-actions">
+    <button class="btn" onclick="openModal('atualizar')">↑ Atualizar dados</button>
+    <button class="btn" onclick="openModal('help')">? Guia</button>
+  </div>
+</div>
+
+<div class="month-strip" id="monthStrip"></div>
+
+<div class="main">
+  <div class="left-panel">
+    <div class="filters-bar">
+      <select class="filter-select" id="filterGroup" onchange="renderTable()">
+        <option value="">Todos os grupos</option>
+        <option value="DESPESAS">Despesas</option>
+      </select>
+      <input class="search-input" type="text" id="searchInput" placeholder="Buscar linha..." oninput="renderTable()">
+      <label class="ml-auto" style="font-size:11px;color:var(--muted);display:flex;align-items:center;gap:5px;cursor:pointer;">
+        <input type="checkbox" id="showOnlyActive" onchange="renderTable()"> Só linhas com movimento
+      </label>
+    </div>
+    <div class="table-panel"><table id="budgetTable"></table></div>
+  </div>
+  <div class="saldo-panel" id="saldoPanel"></div>
+</div>
+
+<!-- MODAL ATUALIZAR -->
+<div class="modal" id="modal-atualizar">
+  <div class="modal-box">
+    <div class="modal-hdr">Atualizar dados <span class="modal-close" onclick="closeModal('atualizar')">✕</span></div>
+    <div class="modal-body">
+      <div class="insight-box" style="margin:0 0 14px;">
+        <div class="ib-title">Como atualizar</div>
+        <div class="ib-item">Abra o Google Sheets com a planilha BASE</div>
+        <div class="ib-item">Selecione tudo (<strong>Ctrl+A</strong>) e copie (<strong>Ctrl+C</strong>)</div>
+        <div class="ib-item">Cole abaixo e clique <strong>Aplicar dados</strong></div>
+      </div>
+      <label style="font-size:12px;font-weight:600;color:var(--muted);">Cole os dados do Sheets aqui (Tab-separated):</label>
+      <textarea id="pasteArea" placeholder="Cole aqui os dados copiados do Google Sheets..."></textarea>
+      <div id="pasteError" style="color:var(--red);font-size:11px;margin-top:6px;display:none;"></div>
+      <div style="display:flex;gap:8px;margin-top:12px;">
+        <button class="btn btn-primary" onclick="applyPastedData()" style="flex:1;">Aplicar dados</button>
+        <button class="btn" onclick="closeModal('atualizar')">Cancelar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL AJUDA -->
+<div class="modal" id="modal-help">
+  <div class="modal-box">
+    <div class="modal-hdr">Guia de uso <span class="modal-close" onclick="closeModal('help')">✕</span></div>
+    <div class="modal-body">
+      <div class="insight-box" style="margin:0 0 12px;">
+        <div class="ib-title">Navegação</div>
+        <div class="ib-item"><strong>Abas de mês</strong>: clique para alternar. O painel direito atualiza automaticamente.</div>
+        <div class="ib-item"><strong>ESTOURO</strong> (vermelho): realizado excedeu o forecast.</div>
+        <div class="ib-item"><strong>ATENÇÃO</strong> (âmbar): acima de 85% do forecast.</div>
+        <div class="ib-item"><strong>Setembro em diante</strong>: sem realizado ainda.</div>
+      </div>
+      <div class="insight-box" style="margin:0;">
+        <div class="ib-title">Convenção</div>
+        <div class="ib-item"><strong>Orçado</strong> = Forecast 26 (orçamento revisado)</div>
+        <div class="ib-item"><strong>Realizado</strong> = valores efetivamente gastos (Realizado 26)</div>
+        <div class="ib-item"><strong>Saldo positivo</strong>: economia. <strong>Saldo negativo</strong>: estouro.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const MONTHS=['JANEIRO','FEVEREIRO','MARÇO','ABRIL','MAIO','JUNHO','JULHO','AGOSTO','SETEMBRO','OUTUBRO','NOVEMBRO','DEZEMBRO'];
+const COM_REAL=['JANEIRO','FEVEREIRO','MARÇO','ABRIL','MAIO','JUNHO','JULHO','AGOSTO'];
+let sel='AGOSTO';
+
+// DADOS EMBUTIDOS — Forecast 26 x Realizado 26 (Template YTD)
+let DATA={"lines": [{"conta": "ALUGUEL", "agrupamento": "DESPESAS", "meses": {"JANEIRO": {"orcado": 0.0, "realizado": -2950.0}, "FEVEREIRO": {"orcado": 0.0, "realizado": -2950.0}, "MARÇO": {"orcado": 0.0, "realizado": -2950.0}, "ABRIL": {"orcado": 0.0, "realizado": -2950.0}, "MAIO": {"orcado": 0.0, "realizado": -2950.0}, "JUNHO": {"orcado": 0.0, "realizado": -3200.0}, "JULHO": {"orcado": 0.0, "realizado": -3200.0}, "AGOSTO": {"orcado": 0.0, "realizado": -3200.0}, "SETEMBRO": {"orcado": 0.0, "realizado": -3200.0}, "OUTUBRO": {"orcado": 0.0, "realizado": 0.0}, "NOVEMBRO": {"orcado": 0.0, "realizado": 0.0}, "DEZEMBRO": {"orcado": 0.0, "realizado": 0.0}}}, {"conta": "ALUGUEL E CONDOMÍNIO", "agrupamento": "DESPESAS", "meses": {"JANEIRO": {"orcado": 16333.73, "realizado": -12077.25}, "FEVEREIRO": {"orcado": 17583.73, "realizado": -10972.56}, "MARÇO": {"orcado": 17583.73, "realizado": -10972.56}, "ABRIL": {"orcado": 17687.14, "realizado": -10972.56}, "MAIO": {"orcado": 17687.14, "realizado": -10972.56}, "JUNHO": {"orcado": 17687.14, "realizado": -10972.56}, "JULHO": {"orcado": 17687.14, "realizado": -10972.56}, "AGOSTO": {"orcado": 17687.14, "realizado": -10972.56}, "SETEMBRO": {"orcado": 17687.14, "realizado": -10972.56}, "OUTUBRO": {"orcado": 17687.14, "realizado": 0.0}, "NOVEMBRO": {"orcado": 17687.14, "realizado": 0.0}, "DEZEMBRO": {"orcado": 17687.14, "realizado": 0.0}}}, {"conta": "CONDOMINIO", "agrupamento": "DESPESAS", "meses": {"JANEIRO": {"orcado": 0.0, "realizado": -670.95}, "FEVEREIRO": {"orcado": 0.0, "realizado": -670.95}, "MARÇO": {"orcado": 0.0, "realizado": -670.95}, "ABRIL": {"orcado": 0.0, "realizado": -670.95}, "MAIO": {"orcado": 0.0, "realizado": -1042.95}, "JUNHO": {"orcado": 0.0, "realizado": -670.95}, "JULHO": {"orcado": 0.0, "realizado": -670.95}, "AGOSTO": {"orcado": 0.0, "realizado": -670.95}, "SETEMBRO": {"orcado": 0.0, "realizado": -670.95}, "OUTUBRO": {"orcado": 0.0, "realizado": 0.0}, "NOVEMBRO": {"orcado": 0.0, "realizado": 0.0}, "DEZEMBRO": {"orcado": 0.0, "realizado": 0.0}}}, {"conta": "CONSULTORIAS", "agrupamento": "DESPESAS", "meses": {"JANEIRO": {"orcado": 75000.0, "realizado": 0.0}, "FEVEREIRO": {"orcado": 75000.0, "realizado": 0.0}, "MARÇO": {"orcado": 75000.0, "realizado": 0.0}, "ABRIL": {"orcado": 34320.54, "realizado": 0.0}, "MAIO": {"orcado": 51480.81, "realizado": 0.0}, "JUNHO": {"orcado": 51480.81, "realizado": 0.0}, "JULHO": {"orcado": 34320.54, "realizado": 0.0}, "AGOSTO": {"orcado": 34320.54, "realizado": 0.0}, "SETEMBRO": {"orcado": 34320.54, "realizado": 0.0}, "OUTUBRO": {"orcado": 34320.54, "realizado": 0.0}, "NOVEMBRO": {"orcado": 34320.54, "realizado": 0.0}, "DEZEMBRO": {"orcado": 51480.81, "realizado": 0.0}}}, {"conta": "DESPESAS C/CONDUÇÃO", "agrupamento": "DESPESAS", "meses": {"JANEIRO": {"orcado": 42203.07, "realizado": 0.0}, "FEVEREIRO": {"orcado": 42203.07, "realizado": 0.0}, "MARÇO": {"orcado": 42203.07, "realizado": 0.0}, "ABRIL": {"orcado": 35132.57, "realizado": 0.0}, "MAIO": {"orcado": 35132.57, "realizado": 0.0}, "JUNHO": {"orcado": 35132.57, "realizado": 0.0}, "JULHO": {"orcado": 35132.57, "realizado": 0.0}, "AGOSTO": {"orcado": 35132.57, "realizado": 0.0}, "SETEMBRO": {"orcado": 35132.57, "realizado": 0.0}, "OUTUBRO": {"orcado": 35132.57, "realizado": 0.0}, "NOVEMBRO": {"orcado": 35132.57, "realizado": 0.0}, "DEZEMBRO": {"orcado": 35132.57, "realizado": 0.0}}}, {"conta": "DESPESAS C/VEÍCULOS (ADM)", "agrupamento": "DESPESAS", "meses": {"JANEIRO": {"orcado": 0.0, "realizado": 0.0}, "FEVEREIRO": {"orcado": 0.0, "realizado": 0.0}, "MARÇO": {"orcado": 0.0, "realizado": 0.0}, "ABRIL": {"orcado": 0.0, "realizado": 0.0}, "MAIO": {"orcado": 1100.0, "realizado": 0.0}, "JUNHO": {"orcado": 1100.0, "realizado": 0.0}, "JULHO": {"orcado": 1100.0, "realizado": 0.0}, "AGOSTO": {"orcado": 1100.0, "realizado": 0.0}, "SETEMBRO": {"orcado": 1100.0, "realizado": 0.0}, "OUTUBRO": {"orcado": 1100.0, "realizado": 0.0}, "NOVEMBRO": {"orcado": 1100.0, "realizado": 0.0}, "DEZEMBRO": {"orcado": 1100.0, "realizado": 0.0}}}, {"conta": "DESPESAS COM VIAGENS", "agrupamento": "DESPESAS", "meses": {"JANEIRO": {"orcado": 12218.77, "realizado": -32780.14}, "FEVEREIRO": {"orcado": 17159.0, "realizado": -15919.77}, "MARÇO": {"orcado": 17159.0, "realizado": -35591.54}, "ABRIL": {"orcado": 50171.62, "realizado": -18107.6}, "MAIO": {"orcado": 44185.0, "realizado": -19888.96}, "JUNHO": {"orcado": 39480.0, "realizado": -23757.98}, "JULHO": {"orcado": 39480.0, "realizado": -20370.99}, "AGOSTO": {"orcado": 67020.0, "realizado": -30935.2}, "SETEMBRO": {"orcado": 39480.0, "realizado": -2666.6}, "OUTUBRO": {"orcado": 39480.0, "realizado": 0.0}, "NOVEMBRO": {"orcado": 46000.0, "realizado": 0.0}, "DEZEMBRO": {"orcado": 39480.0, "realizado": 0.0}}}, {"conta": "DESPESAS DIVERSAS", "agrupamento": "DESPESAS", "meses": {"JANEIRO": {"orcado": 65553.04, "realizado": 0.0}, "FEVEREIRO": {"orcado": 32587.47, "realizado": 0.0}, "MARÇO": {"orcado": 37429.36, "realizado": 0.0}, "ABRIL": {"orcado": 36869.11, "realizado": 0.0}, "MAIO": {"orcado": 34083.47, "realizado": 0.0}, "JUNHO": {"orcado": 19105.64, "realizado": 0.0}, "JULHO": {"orcado": 34402.9, "realizado": 0.0}, "AGOSTO": {"orcado": 25759.44, "realizado": 0.0}, "SETEMBRO": {"orcado": 14809.32, "realizado": 0.0}, "OUTUBRO": {"orcado": 14513.13, "realizado": 0.0}, "NOVEMBRO": {"orcado": 15964.45, "realizado": 0.0}, "DEZEMBRO": {"orcado": 14368.0, "realizado": 0.0}}}, {"conta": "ENERGIA ELÉTRICA", "agrupamento": "DESPESAS", "meses": {"JANEIRO": {"orcado": 2696.35, "realizado": -2019.76}, "FEVEREIRO": {"orcado": 2696.35, "realizado": -1603.66}, "MARÇO": {"orcado": 2696.35, "realizado": -1540.06}, "ABRIL": {"orcado": 2696.35, "realizado": -1855.29}, "MAIO": {"orcado": 2696.35, "realizado": -1775.45}, "JUNHO": {"orcado": 2696.35, "realizado": -1881.7}, "JULHO": {"orcado": 2696.35, "realizado": -1630.92}, "AGOSTO": {"orcado": 2696.35, "realizado": -1912.25}, "SETEMBRO": {"orcado": 2696.35, "realizado": -1262.74}, "OUTUBRO": {"orcado": 2696.35, "realizado": 0.0}, "NOVEMBRO": {"orcado": 2696.35, "realizado": 0.0}, "DEZEMBRO": {"orcado": 2696.35, "realizado": 0.0}}}, {"conta": "INTERNET", "agrupamento": "DESPESAS", "meses": {"JANEIRO": {"orcado": 334.2, "realizado": 0.0}, "FEVEREIRO": {"orcado": 334.2, "realizado": 0.0}, "MARÇO": {"orcado": 334.2, "realizado": 0.0}, "ABRIL": {"orcado": 334.2, "realizado": 0.0}, "MAIO": {"orcado": 334.2, "realizado": 0.0}, "JUNHO": {"orcado": 334.2, "realizado": 0.0}, "JULHO": {"orcado": 334.2, "realizado": 0.0}, "AGOSTO": {"orcado": 334.2, "realizado": 0.0}, "SETEMBRO": {"orcado": 334.2, "realizado": 0.0}, "OUTUBRO": {"orcado": 334.2, "realizado": 0.0}, "NOVEMBRO": {"orcado": 334.2, "realizado": 0.0}, "DEZEMBRO": {"orcado": 334.2, "realizado": 0.0}}}, {"conta": "IPTU (ADM)", "agrupamento": "DESPESAS", "meses": {"JANEIRO": {"orcado": 8689.01, "realizado": 0.0}, "FEVEREIRO": {"orcado": 1749.07, "realizado": -7772.58}, "MARÇO": {"orcado": 691.0, "realizado": 0.0}, "ABRIL": {"orcado": 714.5, "realizado": 0.0}, "MAIO": {"orcado": 714.5, "realizado": 0.0}, "JUNHO": {"orcado": 714.5, "realizado": 0.0}, "JULHO": {"orcado": 714.5, "realizado": -680.0}, "AGOSTO": {"orcado": 714.5, "realizado": -680.0}, "SETEMBRO": {"orcado": 714.5, "realizado": -680.0}, "OUTUBRO": {"orcado": 714.5, "realizado": -680.0}, "NOVEMBRO": {"orcado": 714.5, "realizado": -680.0}, "DEZEMBRO": {"orcado": 714.5, "realizado": -680.0}}}, {"conta": "LANCHES E REFEIÇÕES", "agrupamento": "DESPESAS", "meses": {"JANEIRO": {"orcado": 6523.55, "realizado": -4746.73}, "FEVEREIRO": {"orcado": 6523.55, "realizado": -3113.84}, "MARÇO": {"orcado": 6523.55, "realizado": 0.0}, "ABRIL": {"orcado": 2440.0, "realizado": 0.0}, "MAIO": {"orcado": 2440.0, "realizado": 0.0}, "JUNHO": {"orcado": 2440.0, "realizado": 0.0}, "JULHO": {"orcado": 2440.0, "realizado": 0.0}, "AGOSTO": {"orcado": 2440.0, "realizado": 0.0}, "SETEMBRO": {"orcado": 2440.0, "realizado": 0.0}, "OUTUBRO": {"orcado": 2440.0, "realizado": 0.0}, "NOVEMBRO": {"orcado": 2440.0, "realizado": 0.0}, "DEZEMBRO": {"orcado": 2440.0, "realizado": 0.0}}}, {"conta": "LICENÇA DE USO DE SOFTWARES", "agrupamento": "DESPESAS", "meses": {"JANEIRO": {"orcado": 22538.4, "realizado": -33252.72}, "FEVEREIRO": {"orcado": 19538.4, "realizado": -36586.63}, "MARÇO": {"orcado": 19538.4, "realizado": -28173.0}, "ABRIL": {"orcado": 30488.4, "realizado": -37764.84}, "MAIO": {"orcado": 20988.4, "realizado": -29683.44}, "JUNHO": {"orcado": 22988.4, "realizado": -34657.78}, "JULHO": {"orcado": 22988.4, "realizado": -40902.94}, "AGOSTO": {"orcado": 22988.4, "realizado": -33734.23}, "SETEMBRO": {"orcado": 22988.4, "realizado": -29422.58}, "OUTUBRO": {"orcado": 22988.4, "realizado": 0.0}, "NOVEMBRO": {"orcado": 22988.4, "realizado": 0.0}, "DEZEMBRO": {"orcado": 73244.4, "realizado": 0.0}}}, {"conta": "MANUTENÇÃO DE IMÓVEIS", "agrupamento": "DESPESAS", "meses": {"JANEIRO": {"orcado": 0.0, "realizado": -3580.6}, "FEVEREIRO": {"orcado": 0.0, "realizado": -3580.6}, "MARÇO": {"orcado": 0.0, "realizado": -3729.0}, "ABRIL": {"orcado": 0.0, "realizado": -3558.34}, "MAIO": {"orcado": 0.0, "realizado": -3580.6}, "JUNHO": {"orcado": 0.0, "realizado": -3729.0}, "JULHO": {"orcado": 0.0, "realizado": -3630.6}, "AGOSTO": {"orcado": 0.0, "realizado": -3479.0}, "SETEMBRO": {"orcado": 0.0, "realizado": -3443.86}, "OUTUBRO": {"orcado": 0.0, "realizado": 0.0}, "NOVEMBRO": {"orcado": 0.0, "realizado": 0.0}, "DEZEMBRO": {"orcado": 0.0, "realizado": 0.0}}}, {"conta": "OUTRAS DESPESAS ADMINISTRATIVAS (ADM)", "agrupamento": "DESPESAS", "meses": {"JANEIRO": {"orcado": 14634.0, "realizado": -777.65}, "FEVEREIRO": {"orcado": 14634.0, "realizado": -1788.01}, "MARÇO": {"orcado": 14634.0, "realizado": -1319.86}, "ABRIL": {"orcado": 14634.0, "realizado": -1688.01}, "MAIO": {"orcado": 14634.0, "realizado": -487.2}, "JUNHO": {"orcado": 14634.0, "realizado": -339.75}, "JULHO": {"orcado": 14634.0, "realizado": -339.75}, "AGOSTO": {"orcado": 14634.0, "realizado": -339.75}, "SETEMBRO": {"orcado": 14634.0, "realizado": -151.96}, "OUTUBRO": {"orcado": 14634.0, "realizado": 0.0}, "NOVEMBRO": {"orcado": 14634.0, "realizado": 0.0}, "DEZEMBRO": {"orcado": 14634.0, "realizado": 0.0}}}, {"conta": "PREMIAÇÃO", "agrupamento": "DESPESAS", "meses": {"JANEIRO": {"orcado": 27000.0, "realizado": 0.0}, "FEVEREIRO": {"orcado": 27000.0, "realizado": 0.0}, "MARÇO": {"orcado": 27000.0, "realizado": -1500.0}, "ABRIL": {"orcado": 22000.0, "realizado": 0.0}, "MAIO": {"orcado": 22000.0, "realizado": 0.0}, "JUNHO": {"orcado": 22000.0, "realizado": -1303.0}, "JULHO": {"orcado": 22000.0, "realizado": -3000.0}, "AGOSTO": {"orcado": 22000.0, "realizado": 0.0}, "SETEMBRO": {"orcado": 22000.0, "realizado": 0.0}, "OUTUBRO": {"orcado": 22000.0, "realizado": 0.0}, "NOVEMBRO": {"orcado": 22000.0, "realizado": 0.0}, "DEZEMBRO": {"orcado": 22000.0, "realizado": 0.0}}}, {"conta": "SERVIÇOS APOIO ADMINISTRATIVO", "agrupamento": "DESPESAS", "meses": {"JANEIRO": {"orcado": 2571.65, "realizado": -5131.36}, "FEVEREIRO": {"orcado": 4640.56, "realizado": -3165.76}, "MARÇO": {"orcado": 3606.11, "realizado": -7011.49}, "ABRIL": {"orcado": 3606.11, "realizado": -9293.57}, "MAIO": {"orcado": 3606.11, "realizado": -2367.22}, "JUNHO": {"orcado": 3606.11, "realizado": -22584.03}, "JULHO": {"orcado": 3606.11, "realizado": -14787.06}, "AGOSTO": {"orcado": 3606.11, "realizado": -3153.76}, "SETEMBRO": {"orcado": 3606.11, "realizado": -2855.98}, "OUTUBRO": {"orcado": 3606.11, "realizado": 0.0}, "NOVEMBRO": {"orcado": 3606.11, "realizado": 0.0}, "DEZEMBRO": {"orcado": 3606.11, "realizado": 0.0}}}, {"conta": "TELEFONE", "agrupamento": "DESPESAS", "meses": {"JANEIRO": {"orcado": 6577.13, "realizado": -513.79}, "FEVEREIRO": {"orcado": 6577.13, "realizado": -519.14}, "MARÇO": {"orcado": 6577.13, "realizado": -501.77}, "ABRIL": {"orcado": 6577.13, "realizado": -502.8}, "MAIO": {"orcado": 6577.13, "realizado": -507.6}, "JUNHO": {"orcado": 6577.13, "realizado": -513.7}, "JULHO": {"orcado": 6577.13, "realizado": -513.49}, "AGOSTO": {"orcado": 6577.13, "realizado": -513.36}, "SETEMBRO": {"orcado": 6577.13, "realizado": -338.77}, "OUTUBRO": {"orcado": 6577.13, "realizado": 0.0}, "NOVEMBRO": {"orcado": 6577.13, "realizado": 0.0}, "DEZEMBRO": {"orcado": 6577.13, "realizado": 0.0}}}], "month_totals": {"JANEIRO": {"orcado": 302872.9, "realizado": -98500.95}, "FEVEREIRO": {"orcado": 268226.54, "realizado": -88643.5}, "MARÇO": {"orcado": 270975.9, "realizado": -93960.23}, "ABRIL": {"orcado": 257671.66, "realizado": -87363.96}, "MAIO": {"orcado": 257659.67, "realizado": -73255.98}, "JUNHO": {"orcado": 239976.84, "realizado": -103610.45}, "JULHO": {"orcado": 238113.84, "realizado": -100699.26}, "AGOSTO": {"orcado": 257010.38, "realizado": -89591.06}, "SETEMBRO": {"orcado": 218520.25, "realizado": -55666.0}, "OUTUBRO": {"orcado": 218224.07, "realizado": -680.0}, "NOVEMBRO": {"orcado": 226195.38, "realizado": -680.0}, "DEZEMBRO": {"orcado": 285495.21, "realizado": -680.0}}, "month_order": ["JANEIRO", "FEVEREIRO", "MARÇO", "ABRIL", "MAIO", "JUNHO", "JULHO", "AGOSTO", "SETEMBRO", "OUTUBRO", "NOVEMBRO", "DEZEMBRO"]};
+
+function fmt(v,sign=false){if(v===0)return'—';const a=Math.abs(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});return(sign?(v>0?'+':'-'):'')+'R$ '+a;}
+function fmtK(v){const a=Math.abs(v);if(a>=1e6)return(v<0?'-':'')+'R$ '+(a/1e6).toFixed(1)+'M';if(a>=1e3)return(v<0?'-':'')+'R$ '+(a/1e3).toFixed(0)+'k';return(v<0?'-':'')+'R$ '+a.toFixed(0);}
+
+function renderStrip(){
+  const s=document.getElementById('monthStrip');s.innerHTML='';
+  MONTHS.forEach(m=>{
+    const mt=DATA.month_totals[m];const isFut=!COM_REAL.includes(m);
+    const rA=Math.abs(mt.realizado);const saldo=mt.orcado-rA;
+    const pct=mt.orcado>0?Math.round(rA/mt.orcado*100):0;
+    const t=document.createElement('div');
+    t.className='month-tab'+(m===sel?' active':'')+(isFut?' future':'');
+    t.innerHTML=`<div class="mtname">${m.slice(0,3)}</div><div class="mtsaldo ${saldo>=0?'val-pos':'val-neg'}">${fmtK(saldo)}</div><div class="mtpct">${isFut?'previsto':pct+'% util.'}</div>`;
+    t.onclick=()=>{sel=m;renderStrip();renderTable();renderSaldo();};
+    s.appendChild(t);
+  });
+}
+
+function renderTable(){
+  const grpF=document.getElementById('filterGroup').value;
+  const srch=document.getElementById('searchInput').value.toLowerCase();
+  const actF=document.getElementById('showOnlyActive').checked;
+  const m=sel;const isFut=!COM_REAL.includes(m);
+  const lines=DATA.lines.filter(l=>{
+    if(grpF&&l.agrupamento!==grpF)return false;
+    if(srch&&!l.conta.toLowerCase().includes(srch))return false;
+    if(actF){const mv=l.meses[m];if(!mv||(mv.orcado===0&&mv.realizado===0))return false;}
+    return true;
+  });
+  const groups={};lines.forEach(l=>{if(!groups[l.agrupamento])groups[l.agrupamento]=[];groups[l.agrupamento].push(l);});
+  const cols=isFut?2:5;
+  let h=`<thead><tr><th>Conta</th><th>Forecast</th>${isFut?'':'<th>Realizado</th><th>Saldo</th><th>% Util.</th>'}</tr></thead><tbody>`;
+  let totOrc=0,totReal=0;
+  ['COMISSÕES','DESPESAS','FOLHA'].forEach(grp=>{
+    if(!groups[grp])return;
+    h+=`<tr class="row-group"><td colspan="${cols}">${grp}</td></tr>`;
+    groups[grp].forEach(l=>{
+      const mv=l.meses[m]||{orcado:0,realizado:0};
+      const orc=mv.orcado;const real=mv.realizado;const rA=Math.abs(real);
+      const saldo=orc-rA;const pct=orc>0?rA/orc:(rA>0?99:0);
+      totOrc+=orc;totReal+=rA;
+      let sCls='val-zero';let tag='';
+      if(!isFut&&real!==0){if(saldo<0){sCls='val-neg';tag='<span class="excesso-tag">ESTOURO</span>';}else if(pct>0.85){sCls='val-warn';tag='<span class="atencao-tag">ATENÇÃO</span>';}else sCls='val-pos';}
+      h+=`<tr><td>${l.conta}${tag}</td><td>${fmt(orc)}</td>`;
+      if(!isFut){h+=`<td>${real===0?'<span class="val-zero">—</span>':fmt(rA)}</td><td>${real===0?'<span class="val-zero">—</span>':`<span class="${sCls}">${fmt(saldo,true)}</span>`}</td><td>${real===0?'<span class="val-zero">—</span>':`<span class="${sCls}">${pct>9?'>999':Math.round(pct*100)}%</span>`}</td>`;}
+      h+=`</tr>`;
+    });
+  });
+  const totS=totOrc-totReal;const sCls2=totS>=0?'val-pos':'val-neg';
+  h+=`<tr class="row-total"><td>TOTAL GERAL</td><td>${fmt(totOrc)}</td>`;
+  if(!isFut){const pT=totOrc>0?Math.round(totReal/totOrc*100):0;h+=`<td>${fmt(totReal)}</td><td class="${sCls2}">${fmt(totS,true)}</td><td class="${sCls2}">${pT}%</td>`;}
+  h+=`</tr></tbody>`;
+  document.getElementById('budgetTable').innerHTML=h;
+}
+
+function renderSaldo(){
+  const m=sel;const mt=DATA.month_totals[m];
+  const isFut=!COM_REAL.includes(m);const rA=Math.abs(mt.realizado);
+  const saldo=mt.orcado-rA;const pct=mt.orcado>0?rA/mt.orcado:0;const sCls=saldo>=0?'val-pos':'val-neg';
+  const ld=DATA.lines.map(l=>{const mv=l.meses[m]||{orcado:0,realizado:0};const r=Math.abs(mv.realizado);return{conta:l.conta,orc:mv.orcado,real:r,saldo:mv.orcado-r,pct:mv.orcado>0?r/mv.orcado:(r>0?99:0),hasR:mv.realizado!==0};});
+  const excess=ld.filter(l=>l.saldo<0&&l.hasR).sort((a,b)=>a.saldo-b.saldo).slice(0,5);
+  const econ=ld.filter(l=>l.saldo>0&&l.hasR).sort((a,b)=>b.saldo-a.saldo).slice(0,5);
+  const ytdO=COM_REAL.reduce((s,x)=>s+DATA.month_totals[x].orcado,0);
+  const ytdR=COM_REAL.reduce((s,x)=>s+Math.abs(DATA.month_totals[x].realizado),0);
+  const ytdS=ytdO-ytdR;
+  const best=COM_REAL.map(x=>({m:x,s:DATA.month_totals[x].orcado-Math.abs(DATA.month_totals[x].realizado)})).sort((a,b)=>b.s-a.s)[0];
+  const worst=COM_REAL.map(x=>({m:x,s:DATA.month_totals[x].orcado-Math.abs(DATA.month_totals[x].realizado)})).sort((a,b)=>a.s-b.s)[0];
+  let h=`<div class="saldo-panel-hdr"><div class="sph-title">Saldo — ${m}</div><div class="sph-month">${isFut?'Sem realizado ainda':'Período encerrado'}</div></div>`;
+  if(isFut){h+=`<div class="saldo-big"><div class="sb-label">Forecast previsto</div><div class="sb-value val-pos">${fmt(mt.orcado)}</div><div style="font-size:11px;color:var(--muted);margin-top:6px;">Nenhum realizado registrado.</div></div>`;}
+  else{
+    h+=`<div class="saldo-big"><div class="sb-label">Saldo do Mês</div><div class="sb-value ${sCls}">${fmt(saldo)}</div>
+    <div class="sb-row"><span style="color:var(--muted)">Forecast</span><strong>${fmt(mt.orcado)}</strong></div>
+    <div class="sb-row"><span style="color:var(--muted)">Realizado</span><strong>${fmt(rA)}</strong></div>
+    <div class="sb-row"><span style="color:var(--muted)">Utilização</span><strong class="${sCls}">${Math.round(pct*100)}%</strong></div></div>
+    <div class="kpi-row">
+      <div class="kpi"><div class="kpi-label">YTD Forecast</div><div class="kpi-val">${fmtK(ytdO)}</div></div>
+      <div class="kpi"><div class="kpi-label">YTD Real.</div><div class="kpi-val">${fmtK(ytdR)}</div></div>
+      <div class="kpi"><div class="kpi-label">YTD Saldo</div><div class="kpi-val ${ytdS>=0?'val-pos':'val-neg'}">${fmtK(ytdS)}</div></div>
+    </div>`;
+    if(excess.length){h+=`<div class="detail-section"><div class="ds-title">🔴 Maiores estouros</div>`;excess.forEach(l=>{const bw=Math.min(100,Math.round(l.pct*100));h+=`<div class="detail-item"><div><div class="di-name">${l.conta}</div><div class="di-bar-wrap"><div class="di-bar" style="width:${bw}%;background:var(--red)"></div></div></div><div class="di-meta"><div class="di-saldo val-neg">${fmt(l.saldo)}</div><div class="di-pct">${Math.round(l.pct*100)}%</div></div></div>`;});h+=`</div>`;}
+    if(econ.length){h+=`<div class="detail-section"><div class="ds-title">🟢 Maiores economias</div>`;econ.forEach(l=>{const bw=Math.min(100,Math.round(l.pct*100));h+=`<div class="detail-item"><div><div class="di-name">${l.conta}</div><div class="di-bar-wrap"><div class="di-bar" style="width:${bw}%;background:var(--green)"></div></div></div><div class="di-meta"><div class="di-saldo val-pos">${fmt(l.saldo)}</div><div class="di-pct">${Math.round(l.pct*100)}%</div></div></div>`;});h+=`</div>`;}
+  }
+  h+=`<div class="insight-box"><div class="ib-title">Análise do ano</div>
+  <div class="ib-item">Melhor mês: <strong>${best.m}</strong> (${fmt(best.s)})</div>
+  <div class="ib-item">Pior mês: <strong>${worst.m}</strong> (${fmt(worst.s)})</div>
+  <div class="ib-item">YTD: ${ytdS>=0?'<strong class="val-pos">dentro do forecast</strong>':'<strong class="val-neg">acima do forecast</strong>'} em <strong>${fmt(Math.abs(ytdS))}</strong></div></div>`;
+  document.getElementById('saldoPanel').innerHTML=h;
+}
+
+function applyPastedData(){
+  const raw=document.getElementById('pasteArea').value.trim();
+  const errDiv=document.getElementById('pasteError');
+  if(!raw){errDiv.textContent='Cole os dados antes de aplicar.';errDiv.style.display='';return;}
+  try{
+    const lines=raw.split('\n');
+    const headers=lines[0].split('\t').map(h=>h.trim());
+    const relIdx=headers.findIndex(h=>h.toUpperCase().includes('RELAT'));
+    const mesIdx=headers.findIndex(h=>h.toUpperCase().replace(/[^A-Z]/g,'').startsWith('M') && h.length<=5);
+    const grpIdx=headers.findIndex(h=>h.toUpperCase().includes('AGRUP'));
+    const contaIdx=headers.findIndex(h=>h.toUpperCase().includes('CONTA'));
+    const valIdx=headers.findIndex(h=>h.toUpperCase().includes('VALOR'));
+    if(relIdx<0||mesIdx<0||contaIdx<0||valIdx<0) throw new Error('Colunas não encontradas. Copie incluindo o cabeçalho.');
+    const month_totals={};MONTHS.forEach(m=>{month_totals[m]={orcado:0,realizado:0};});
+    const lmap={};
+    lines.slice(1).forEach(line=>{
+      const cols=line.split('\t');
+      const tipo=(cols[relIdx]||'').trim().toUpperCase();
+      const mes=(cols[mesIdx]||'').trim().toUpperCase();
+      const grp=(cols[grpIdx]||'DESPESAS').trim().toUpperCase();
+      const conta=(cols[contaIdx]||'').trim();
+      const rawV=(cols[valIdx]||'0').trim().replace(/"/g,'');
+      const val=parseFloat(rawV.replace(/\./g,'').replace(',','.'))||0;
+      if(!conta||!mes||!MONTHS.includes(mes))return;
+      if(!lmap[conta]){lmap[conta]={conta,agrupamento:grp,meses:{}};MONTHS.forEach(m=>{lmap[conta].meses[m]={orcado:0,realizado:0};});}
+      const isOrc=tipo.includes('FORE')||tipo.includes('ORC');
+      const isReal=tipo.includes('REAL');
+      if(isOrc){lmap[conta].meses[mes].orcado+=val;month_totals[mes].orcado+=val;}
+      else if(isReal){lmap[conta].meses[mes].realizado+=val;month_totals[mes].realizado+=val;}
+    });
+    DATA={lines:Object.values(lmap),month_totals,month_order:MONTHS};
+    closeModal('atualizar');
+    document.getElementById('dataInfo').textContent='Dados atualizados manualmente · '+new Date().toLocaleDateString('pt-BR');
+    renderStrip();renderTable();renderSaldo();
+    errDiv.style.display='none';
+  } catch(e){
+    errDiv.textContent='Erro: '+e.message;errDiv.style.display='';
+  }
+}
+
+function openModal(id){document.getElementById('modal-'+id).classList.add('open');}
+function closeModal(id){document.getElementById('modal-'+id).classList.remove('open');}
+document.querySelectorAll('.modal').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open');}));
+
+renderStrip();renderTable();renderSaldo();
+</script>
+</body>
+</html>
