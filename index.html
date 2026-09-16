@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Controle Or&#231;ament&#225;rio &#8212; Diretoria Comercial 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Calibri:wght@400;600;700&family=Carlito:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --azul:#00148A;--azul2:#0F1F8C;--laranja:#FF8C00;
+  --bg:#F6F6F6;--white:#FFFFFF;--border:#D0D5E8;
+  --text:#1a1a2e;--muted:#6B7280;--surface:#FFFFFF;
+  --green:#16a34a;--red:#dc2626;--amber:#d97706;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Carlito','Calibri',sans-serif;font-size:13px;}
+
+/* HEADER */
+.hdr{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 24px;height:64px;
+  background:var(--azul);
+  position:relative;overflow:hidden;
+}
+.hdr::after{
+  content:'';position:absolute;right:0;top:0;bottom:0;width:120px;
+  background:var(--laranja);
+  clip-path:polygon(40% 0,100% 0,100% 100%,0% 100%);
+}
+.hdr-logo{height:36px;display:flex;align-items:center;z-index:1;}
+.hdr-logo svg{height:28px;width:auto;}
+.hdr-center{
+  position:absolute;left:50%;transform:translateX(-50%);
+  text-align:center;z-index:1;
+}
+.hdr-title{font-size:15px;font-weight:700;color:var(--white);letter-spacing:.02em;}
+.hdr-sub{font-size:11px;color:rgba(255,255,255,.7);margin-top:2px;display:flex;align-items:center;gap:5px;justify-content:center;}
+.dot{width:7px;height:7px;border-radius:50%;display:inline-block;}
+.dot.ok{background:#4ade80;}
+.dot.loading{background:#fbbf24;animation:pulse 1s infinite;}
+.dot.warn{background:#fbbf24;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.hdr-actions{display:flex;gap:8px;z-index:1;}
+.btn{
+  padding:7px 16px;border-radius:4px;border:none;
+  font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;
+  letter-spacing:.02em;transition:opacity .15s;
+}
+.btn:hover{opacity:.85;}
+.btn-primary{background:var(--laranja);color:var(--white);}
+.btn-outline{background:rgba(255,255,255,.15);color:var(--white);border:1px solid rgba(255,255,255,.3);}
+
+/* MONTH STRIP */
+.month-strip{
+  display:flex;overflow-x:auto;
+  background:var(--azul2);border-bottom:3px solid var(--laranja);
+}
+.month-tab{
+  min-width:85px;padding:8px 10px;text-align:center;
+  cursor:pointer;border-right:1px solid rgba(255,255,255,.1);
+  border-bottom:3px solid transparent;flex:1;
+  transition:background .15s;
+}
+.month-tab:hover{background:rgba(255,255,255,.08);}
+.month-tab.active{background:rgba(255,255,255,.12);border-bottom-color:var(--laranja);}
+.month-tab.future{opacity:.5;}
+.mtname{font-size:10px;font-weight:700;color:rgba(255,255,255,.6);text-transform:uppercase;letter-spacing:.06em;}
+.month-tab.active .mtname{color:var(--laranja);}
+.mtsaldo{font-size:13px;font-weight:700;margin-top:2px;}
+.mtpct{font-size:10px;color:rgba(255,255,255,.5);margin-top:1px;}
+
+/* MAIN */
+.main{display:flex;height:calc(100vh - 112px);overflow:hidden;}
+.left-panel{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+
+/* FILTERS */
+.filters-bar{
+  display:flex;align-items:center;gap:10px;padding:8px 16px;
+  background:var(--white);border-bottom:1px solid var(--border);
+  flex-shrink:0;
+}
+.filter-select,.search-input{
+  background:var(--bg);border:1px solid var(--border);
+  border-radius:4px;color:var(--text);padding:5px 10px;font-size:11px;
+  font-family:inherit;
+}
+.filter-select:focus,.search-input:focus{outline:none;border-color:var(--azul);}
+.search-input{width:200px;}
+.ml-auto{margin-left:auto;}
+.cb-label{font-size:11px;color:var(--muted);display:flex;align-items:center;gap:5px;cursor:pointer;}
+
+/* TABLE */
+.table-panel{flex:1;overflow:auto;}
+table{width:100%;border-collapse:collapse;font-size:12px;}
+thead{position:sticky;top:0;z-index:10;}
+thead tr{background:var(--azul);}
+th{
+  padding:10px 14px;text-align:right;font-weight:700;font-size:11px;
+  color:var(--white);letter-spacing:.04em;text-transform:uppercase;
+  white-space:nowrap;
+}
+th:first-child{text-align:left;min-width:220px;position:sticky;left:0;background:var(--azul);z-index:11;}
+td{
+  padding:9px 14px;border-bottom:1px solid #E8ECF5;
+  text-align:right;white-space:nowrap;background:var(--white);
+}
+td:first-child{text-align:left;position:sticky;left:0;background:var(--white);z-index:5;}
+tr:hover td{background:#EEF1FA;}
+tr:hover td:first-child{background:#EEF1FA;}
+.row-group td{
+  padding:6px 14px;
+  background:#E8ECF5!important;
+  font-weight:700;font-size:10px;color:var(--azul);
+  letter-spacing:.08em;text-transform:uppercase;
+  border-top:2px solid var(--azul);
+}
+.row-total td{
+  font-weight:700;font-size:13px;
+  border-top:2px solid var(--laranja);
+  background:#FFF8F0!important;color:var(--azul);
+}
+.val-pos{color:var(--green);font-weight:600;}
+.val-neg{color:var(--red);font-weight:600;}
+.val-warn{color:var(--amber);font-weight:600;}
+.val-zero{color:var(--muted);}
+.tag{display:inline-block;font-size:9px;padding:1px 6px;border-radius:3px;font-weight:700;margin-left:5px;}
+.tag-estouro{background:#FEE2E2;color:var(--red);}
+.tag-atencao{background:#FEF3C7;color:#92400E;}
+
+/* SALDO PANEL */
+.saldo-panel{
+  width:300px;border-left:3px solid var(--laranja);
+  overflow-y:auto;background:var(--white);flex-shrink:0;
+}
+.saldo-hdr{
+  padding:14px 16px 10px;
+  background:var(--azul);
+}
+.saldo-hdr-title{font-size:13px;font-weight:700;color:var(--white);}
+.saldo-hdr-sub{font-size:11px;color:rgba(255,255,255,.6);margin-top:2px;}
+.saldo-big{padding:16px;border-bottom:2px solid var(--border);}
+.sb-label{font-size:10px;color:var(--muted);font-weight:700;letter-spacing:.06em;text-transform:uppercase;}
+.sb-value{font-size:26px;font-weight:700;margin-top:4px;}
+.sb-row{display:flex;justify-content:space-between;margin-top:5px;font-size:12px;color:var(--muted);}
+.sb-row strong{color:var(--text);}
+.kpi-row{display:flex;border-bottom:1px solid var(--border);}
+.kpi{flex:1;padding:10px 12px;border-right:1px solid var(--border);}
+.kpi:last-child{border-right:none;}
+.kpi-label{font-size:9px;color:var(--muted);font-weight:700;letter-spacing:.05em;text-transform:uppercase;}
+.kpi-val{font-size:15px;font-weight:700;margin-top:3px;color:var(--azul);}
+.section-title{
+  font-size:10px;font-weight:700;color:var(--white);
+  letter-spacing:.06em;text-transform:uppercase;
+  background:var(--azul2);padding:6px 14px;
+}
+.detail-item{
+  display:flex;justify-content:space-between;align-items:flex-start;
+  padding:8px 14px;border-bottom:1px solid #E8ECF5;gap:8px;
+}
+.detail-item:last-child{border-bottom:none;}
+.di-name{font-size:11px;font-weight:600;color:var(--text);flex:1;line-height:1.3;}
+.di-meta{text-align:right;}
+.di-val{font-size:12px;font-weight:700;}
+.di-pct{font-size:10px;color:var(--muted);}
+.di-bar-wrap{width:100%;height:3px;background:#E8ECF5;border-radius:2px;margin-top:3px;}
+.di-bar{height:100%;border-radius:2px;}
+.insight-box{margin:12px;background:#F0F4FF;border:1px solid var(--border);border-left:3px solid var(--laranja);border-radius:4px;padding:12px;}
+.ib-title{font-size:11px;font-weight:700;color:var(--azul);margin-bottom:7px;}
+.ib-item{font-size:11px;color:var(--muted);margin-bottom:4px;padding-left:10px;position:relative;}
+.ib-item::before{content:"\25B8";position:absolute;left:0;color:var(--laranja);}
+.ib-item strong{color:var(--text);}
+
+/* FOOTER */
+.footer{
+  background:var(--azul);color:rgba(255,255,255,.5);
+  font-size:10px;text-align:center;padding:6px;
+  border-top:2px solid var(--laranja);flex-shrink:0;
+}
+
+::-webkit-scrollbar{width:5px;height:5px;}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="hdr-logo"><svg viewBox="0 0 212.66 83.67" xmlns="http://www.w3.org/2000/svg" overflow="hidden"><path d="M20.25 15.86C9.5 25.43 2.16 38.12 0.03 52.31-0.23 54.01 1.06 55.44 2.77 55.67 3.91 55.82 5.25 55.84 6.44 55.81 11.7 55.69 17.24 53.98 22.96 53 24.01 52.82 24.71 51.97 24.71 50.99L24.71 17.85C24.71 15.53 21.97 14.32 20.24 15.86M103.88 15.34C99.33 15.34 95.13 16.84 91.75 19.37 91.75 19.37 91.75 19.37 91.75 19.37 91.75 19.37 91.74 19.37 91.74 19.37 91.74 17.63 90.64 16.05 88.97 15.54 86.19 14.69 83.65 16.74 83.65 19.39L83.65 51.63C83.65 53.81 85.32 55.68 87.5 55.78 89.82 55.89 91.74 54.04 91.74 51.74L91.74 35.57C91.74 28.87 97.18 23.43 103.88 23.43 107.45 23.43 110.65 24.97 112.87 27.41 114.09 28.75 116.08 29.18 117.7 28.37 120.11 27.18 120.7 24.02 118.91 22.04 115.21 17.93 109.85 15.35 103.88 15.35M174.6 23.31C176.84 20.07 179.94 17.46 183.56 15.83 183.81 15.72 183.73 15.34 183.45 15.34L164.8 15.34C164.66 15.34 164.54 15.45 164.54 15.6L164.54 23.17C164.54 23.31 164.65 23.43 164.8 23.43L174.39 23.43C174.47 23.43 174.55 23.39 174.6 23.32M159.11 0 159.11 0C156.88 0 155.07 1.81 155.07 4.04L155.07 35.55C155.07 42.25 149.63 47.69 142.92 47.69 136.21 47.69 130.78 42.26 130.78 35.55 130.78 28.84 136.22 23.41 142.92 23.41 142.92 23.41 142.92 23.41 142.92 23.41L153.42 23.41C153.56 23.41 153.68 23.29 153.68 23.15L153.68 15.58C153.68 15.44 153.56 15.32 153.42 15.32L142.92 15.32C131.75 15.32 122.69 24.37 122.69 35.54 122.69 46.71 131.75 55.76 142.92 55.76 154.09 55.76 163.15 46.71 163.15 35.54L163.15 4.04C163.15 1.81 161.34 0 159.11 0M212.64 34.65C212.53 32.12 210.11 30.35 207.67 31L207.5 31.04C205.68 31.52 204.49 33.21 204.56 35.09 204.56 35.25 204.56 35.4 204.56 35.56 204.56 42.26 199.12 47.7 192.42 47.7 185.72 47.7 180.28 42.27 180.28 35.56 180.28 28.85 185.72 23.42 192.42 23.42 192.71 23.42 193.01 23.43 193.29 23.45 195.07 23.58 196.72 22.54 197.3 20.86L197.38 20.64C198.23 18.18 196.51 15.59 193.91 15.4 193.42 15.36 192.92 15.35 192.42 15.35 181.25 15.35 172.19 24.4 172.19 35.57 172.19 46.74 181.25 55.79 192.42 55.79 203.59 55.79 212.65 46.74 212.65 35.57 212.65 35.26 212.65 34.96 212.63 34.66M63.75 52.88C63.93 54.86 61.94 56.33 60.1 55.57 58.98 55.11 57.89 54.68 57.21 54.45 49.94 52.04 41.87 51.07 32.9 51.71 31.35 51.82 30.08 50.64 30.08 49.12L30.08 2.86C30.08 0.2 32.79-0.79 34.72 0.68 50.1 12.42 60.61 29.4 63.4 49.45 63.52 50.31 63.65 51.6 63.76 52.88" fill="white"/></svg></div>
+  <div class="hdr-center">
+    <div class="hdr-title">Controle Or&#231;ament&#225;rio &#8212; Diretoria Comercial</div>
+    <div class="hdr-sub">
+      <span class="dot ok" id="statusDot"></span>
+      <span id="statusText">Carregando...</span>
+    </div>
+  </div>
+  <div class="hdr-actions">
+    <button class="btn btn-outline" onclick="openHelp()">? Guia</button>
+    <button class="btn btn-primary" onclick="atualizarDoSheets()">&#8635; Atualizar do Sheets</button>
+  </div>
+</div>
+
+<div class="month-strip" id="monthStrip"></div>
+
+<div class="main">
+  <div class="left-panel">
+    <div class="filters-bar">
+      <select class="filter-select" id="filterGroup" onchange="renderTable()">
+        <option value="">Todos os grupos</option>
+        <option value="DESPESAS">Despesas</option>
+      </select>
+      <input class="search-input" type="text" id="searchInput" placeholder="&#128269; Buscar linha..." oninput="renderTable()">
+      <label class="cb-label ml-auto">
+        <input type="checkbox" id="showOnlyActive" onchange="renderTable()"> S&#243; com movimento
+      </label>
+    </div>
+    <div class="table-panel"><table id="budgetTable"></table></div>
+  </div>
+  <div class="saldo-panel" id="saldoPanel"></div>
+</div>
+
+<div class="footer">rdcviagens.com.br &nbsp;&#8212;&nbsp; O jeito inteligente de viajar o ano todo.</div>
+
+<script>
+var MONTHS=['JANEIRO','FEVEREIRO','MARÇO','ABRIL','MAIO','JUNHO','JULHO','AGOSTO','SETEMBRO','OUTUBRO','NOVEMBRO','DEZEMBRO'];
+var COM_REAL=['JANEIRO','FEVEREIRO','MARÇO','ABRIL','MAIO','JUNHO','JULHO','AGOSTO'];
+var SHEETS_URL='https://docs.google.com/spreadsheets/d/e/2PACX-1vRkGu4Zu5Ds4hQudSot3IEu4_DsOMRyThRn4PHsDbjBNmbiaWClwnOeM4yw8dpUNw/pub?gid=1885849280&single=true&output=csv';
+var DATA=JSON.parse("{\"lines\": [{\"conta\": \"ALUGUEL\", \"agrupamento\": \"DESPESAS\", \"meses\": {\"JANEIRO\": {\"orcado\": 0.0, \"realizado\": -2950.0}, \"FEVEREIRO\": {\"orcado\": 0.0, \"realizado\": -2950.0}, \"MAR\\u00c7O\": {\"orcado\": 0.0, \"realizado\": -2950.0}, \"ABRIL\": {\"orcado\": 0.0, \"realizado\": -2950.0}, \"MAIO\": {\"orcado\": 0.0, \"realizado\": -2950.0}, \"JUNHO\": {\"orcado\": 0.0, \"realizado\": -3200.0}, \"JULHO\": {\"orcado\": 0.0, \"realizado\": -3200.0}, \"AGOSTO\": {\"orcado\": 0.0, \"realizado\": -3200.0}, \"SETEMBRO\": {\"orcado\": 0.0, \"realizado\": -3200.0}, \"OUTUBRO\": {\"orcado\": 0.0, \"realizado\": 0.0}, \"NOVEMBRO\": {\"orcado\": 0.0, \"realizado\": 0.0}, \"DEZEMBRO\": {\"orcado\": 0.0, \"realizado\": 0.0}}}, {\"conta\": \"ALUGUEL E CONDOM\\u00cdNIO\", \"agrupamento\": \"DESPESAS\", \"meses\": {\"JANEIRO\": {\"orcado\": 16333.73, \"realizado\": -12077.25}, \"FEVEREIRO\": {\"orcado\": 17583.73, \"realizado\": -10972.56}, \"MAR\\u00c7O\": {\"orcado\": 17583.73, \"realizado\": -10972.56}, \"ABRIL\": {\"orcado\": 17687.14, \"realizado\": -10972.56}, \"MAIO\": {\"orcado\": 17687.14, \"realizado\": -10972.56}, \"JUNHO\": {\"orcado\": 17687.14, \"realizado\": -10972.56}, \"JULHO\": {\"orcado\": 17687.14, \"realizado\": -10972.56}, \"AGOSTO\": {\"orcado\": 17687.14, \"realizado\": -10972.56}, \"SETEMBRO\": {\"orcado\": 17687.14, \"realizado\": -10972.56}, \"OUTUBRO\": {\"orcado\": 17687.14, \"realizado\": 0.0}, \"NOVEMBRO\": {\"orcado\": 17687.14, \"realizado\": 0.0}, \"DEZEMBRO\": {\"orcado\": 17687.14, \"realizado\": 0.0}}}, {\"conta\": \"CONDOMINIO\", \"agrupamento\": \"DESPESAS\", \"meses\": {\"JANEIRO\": {\"orcado\": 0.0, \"realizado\": -670.95}, \"FEVEREIRO\": {\"orcado\": 0.0, \"realizado\": -670.95}, \"MAR\\u00c7O\": {\"orcado\": 0.0, \"realizado\": -670.95}, \"ABRIL\": {\"orcado\": 0.0, \"realizado\": -670.95}, \"MAIO\": {\"orcado\": 0.0, \"realizado\": -1042.95}, \"JUNHO\": {\"orcado\": 0.0, \"realizado\": -670.95}, \"JULHO\": {\"orcado\": 0.0, \"realizado\": -670.95}, \"AGOSTO\": {\"orcado\": 0.0, \"realizado\": -670.95}, \"SETEMBRO\": {\"orcado\": 0.0, \"realizado\": -670.95}, \"OUTUBRO\": {\"orcado\": 0.0, \"realizado\": 0.0}, \"NOVEMBRO\": {\"orcado\": 0.0, \"realizado\": 0.0}, \"DEZEMBRO\": {\"orcado\": 0.0, \"realizado\": 0.0}}}, {\"conta\": \"CONSULTORIAS\", \"agrupamento\": \"DESPESAS\", \"meses\": {\"JANEIRO\": {\"orcado\": 75000.0, \"realizado\": 0.0}, \"FEVEREIRO\": {\"orcado\": 75000.0, \"realizado\": 0.0}, \"MAR\\u00c7O\": {\"orcado\": 75000.0, \"realizado\": 0.0}, \"ABRIL\": {\"orcado\": 34320.54, \"realizado\": 0.0}, \"MAIO\": {\"orcado\": 51480.81, \"realizado\": 0.0}, \"JUNHO\": {\"orcado\": 51480.81, \"realizado\": 0.0}, \"JULHO\": {\"orcado\": 34320.54, \"realizado\": 0.0}, \"AGOSTO\": {\"orcado\": 34320.54, \"realizado\": 0.0}, \"SETEMBRO\": {\"orcado\": 34320.54, \"realizado\": 0.0}, \"OUTUBRO\": {\"orcado\": 34320.54, \"realizado\": 0.0}, \"NOVEMBRO\": {\"orcado\": 34320.54, \"realizado\": 0.0}, \"DEZEMBRO\": {\"orcado\": 51480.81, \"realizado\": 0.0}}}, {\"conta\": \"DESPESAS C/CONDU\\u00c7\\u00c3O\", \"agrupamento\": \"DESPESAS\", \"meses\": {\"JANEIRO\": {\"orcado\": 42203.07, \"realizado\": 0.0}, \"FEVEREIRO\": {\"orcado\": 42203.07, \"realizado\": 0.0}, \"MAR\\u00c7O\": {\"orcado\": 42203.07, \"realizado\": 0.0}, \"ABRIL\": {\"orcado\": 35132.57, \"realizado\": 0.0}, \"MAIO\": {\"orcado\": 35132.57, \"realizado\": 0.0}, \"JUNHO\": {\"orcado\": 35132.57, \"realizado\": 0.0}, \"JULHO\": {\"orcado\": 35132.57, \"realizado\": 0.0}, \"AGOSTO\": {\"orcado\": 35132.57, \"realizado\": 0.0}, \"SETEMBRO\": {\"orcado\": 35132.57, \"realizado\": 0.0}, \"OUTUBRO\": {\"orcado\": 35132.57, \"realizado\": 0.0}, \"NOVEMBRO\": {\"orcado\": 35132.57, \"realizado\": 0.0}, \"DEZEMBRO\": {\"orcado\": 35132.57, \"realizado\": 0.0}}}, {\"conta\": \"DESPESAS C/VE\\u00cdCULOS (ADM)\", \"agrupamento\": \"DESPESAS\", \"meses\": {\"JANEIRO\": {\"orcado\": 0.0, \"realizado\": 0.0}, \"FEVEREIRO\": {\"orcado\": 0.0, \"realizado\": 0.0}, \"MAR\\u00c7O\": {\"orcado\": 0.0, \"realizado\": 0.0}, \"ABRIL\": {\"orcado\": 0.0, \"realizado\": 0.0}, \"MAIO\": {\"orcado\": 1100.0, \"realizado\": 0.0}, \"JUNHO\": {\"orcado\": 1100.0, \"realizado\": 0.0}, \"JULHO\": {\"orcado\": 1100.0, \"realizado\": 0.0}, \"AGOSTO\": {\"orcado\": 1100.0, \"realizado\": 0.0}, \"SETEMBRO\": {\"orcado\": 1100.0, \"realizado\": 0.0}, \"OUTUBRO\": {\"orcado\": 1100.0, \"realizado\": 0.0}, \"NOVEMBRO\": {\"orcado\": 1100.0, \"realizado\": 0.0}, \"DEZEMBRO\": {\"orcado\": 1100.0, \"realizado\": 0.0}}}, {\"conta\": \"DESPESAS COM VIAGENS\", \"agrupamento\": \"DESPESAS\", \"meses\": {\"JANEIRO\": {\"orcado\": 12218.77, \"realizado\": -32780.14}, \"FEVEREIRO\": {\"orcado\": 17159.0, \"realizado\": -15919.77}, \"MAR\\u00c7O\": {\"orcado\": 17159.0, \"realizado\": -35591.54}, \"ABRIL\": {\"orcado\": 50171.62, \"realizado\": -18107.6}, \"MAIO\": {\"orcado\": 44185.0, \"realizado\": -19888.96}, \"JUNHO\": {\"orcado\": 39480.0, \"realizado\": -23757.98}, \"JULHO\": {\"orcado\": 39480.0, \"realizado\": -20370.99}, \"AGOSTO\": {\"orcado\": 67020.0, \"realizado\": -30935.2}, \"SETEMBRO\": {\"orcado\": 39480.0, \"realizado\": -2666.6}, \"OUTUBRO\": {\"orcado\": 39480.0, \"realizado\": 0.0}, \"NOVEMBRO\": {\"orcado\": 46000.0, \"realizado\": 0.0}, \"DEZEMBRO\": {\"orcado\": 39480.0, \"realizado\": 0.0}}}, {\"conta\": \"DESPESAS DIVERSAS\", \"agrupamento\": \"DESPESAS\", \"meses\": {\"JANEIRO\": {\"orcado\": 65553.04, \"realizado\": 0.0}, \"FEVEREIRO\": {\"orcado\": 32587.47, \"realizado\": 0.0}, \"MAR\\u00c7O\": {\"orcado\": 37429.36, \"realizado\": 0.0}, \"ABRIL\": {\"orcado\": 36869.11, \"realizado\": 0.0}, \"MAIO\": {\"orcado\": 34083.47, \"realizado\": 0.0}, \"JUNHO\": {\"orcado\": 19105.64, \"realizado\": 0.0}, \"JULHO\": {\"orcado\": 34402.9, \"realizado\": 0.0}, \"AGOSTO\": {\"orcado\": 25759.44, \"realizado\": 0.0}, \"SETEMBRO\": {\"orcado\": 14809.32, \"realizado\": 0.0}, \"OUTUBRO\": {\"orcado\": 14513.13, \"realizado\": 0.0}, \"NOVEMBRO\": {\"orcado\": 15964.45, \"realizado\": 0.0}, \"DEZEMBRO\": {\"orcado\": 14368.0, \"realizado\": 0.0}}}, {\"conta\": \"ENERGIA EL\\u00c9TRICA\", \"agrupamento\": \"DESPESAS\", \"meses\": {\"JANEIRO\": {\"orcado\": 2696.35, \"realizado\": -2019.76}, \"FEVEREIRO\": {\"orcado\": 2696.35, \"realizado\": -1603.66}, \"MAR\\u00c7O\": {\"orcado\": 2696.35, \"realizado\": -1540.06}, \"ABRIL\": {\"orcado\": 2696.35, \"realizado\": -1855.29}, \"MAIO\": {\"orcado\": 2696.35, \"realizado\": -1775.45}, \"JUNHO\": {\"orcado\": 2696.35, \"realizado\": -1881.7}, \"JULHO\": {\"orcado\": 2696.35, \"realizado\": -1630.92}, \"AGOSTO\": {\"orcado\": 2696.35, \"realizado\": -1912.25}, \"SETEMBRO\": {\"orcado\": 2696.35, \"realizado\": -1262.74}, \"OUTUBRO\": {\"orcado\": 2696.35, \"realizado\": 0.0}, \"NOVEMBRO\": {\"orcado\": 2696.35, \"realizado\": 0.0}, \"DEZEMBRO\": {\"orcado\": 2696.35, \"realizado\": 0.0}}}, {\"conta\": \"INTERNET\", \"agrupamento\": \"DESPESAS\", \"meses\": {\"JANEIRO\": {\"orcado\": 334.2, \"realizado\": 0.0}, \"FEVEREIRO\": {\"orcado\": 334.2, \"realizado\": 0.0}, \"MAR\\u00c7O\": {\"orcado\": 334.2, \"realizado\": 0.0}, \"ABRIL\": {\"orcado\": 334.2, \"realizado\": 0.0}, \"MAIO\": {\"orcado\": 334.2, \"realizado\": 0.0}, \"JUNHO\": {\"orcado\": 334.2, \"realizado\": 0.0}, \"JULHO\": {\"orcado\": 334.2, \"realizado\": 0.0}, \"AGOSTO\": {\"orcado\": 334.2, \"realizado\": 0.0}, \"SETEMBRO\": {\"orcado\": 334.2, \"realizado\": 0.0}, \"OUTUBRO\": {\"orcado\": 334.2, \"realizado\": 0.0}, \"NOVEMBRO\": {\"orcado\": 334.2, \"realizado\": 0.0}, \"DEZEMBRO\": {\"orcado\": 334.2, \"realizado\": 0.0}}}, {\"conta\": \"IPTU (ADM)\", \"agrupamento\": \"DESPESAS\", \"meses\": {\"JANEIRO\": {\"orcado\": 8689.01, \"realizado\": 0.0}, \"FEVEREIRO\": {\"orcado\": 1749.07, \"realizado\": -7772.58}, \"MAR\\u00c7O\": {\"orcado\": 691.0, \"realizado\": 0.0}, \"ABRIL\": {\"orcado\": 714.5, \"realizado\": 0.0}, \"MAIO\": {\"orcado\": 714.5, \"realizado\": 0.0}, \"JUNHO\": {\"orcado\": 714.5, \"realizado\": 0.0}, \"JULHO\": {\"orcado\": 714.5, \"realizado\": -680.0}, \"AGOSTO\": {\"orcado\": 714.5, \"realizado\": -680.0}, \"SETEMBRO\": {\"orcado\": 714.5, \"realizado\": -680.0}, \"OUTUBRO\": {\"orcado\": 714.5, \"realizado\": -680.0}, \"NOVEMBRO\": {\"orcado\": 714.5, \"realizado\": -680.0}, \"DEZEMBRO\": {\"orcado\": 714.5, \"realizado\": -680.0}}}, {\"conta\": \"LANCHES E REFEI\\u00c7\\u00d5ES\", \"agrupamento\": \"DESPESAS\", \"meses\": {\"JANEIRO\": {\"orcado\": 6523.55, \"realizado\": -4746.73}, \"FEVEREIRO\": {\"orcado\": 6523.55, \"realizado\": -3113.84}, \"MAR\\u00c7O\": {\"orcado\": 6523.55, \"realizado\": 0.0}, \"ABRIL\": {\"orcado\": 2440.0, \"realizado\": 0.0}, \"MAIO\": {\"orcado\": 2440.0, \"realizado\": 0.0}, \"JUNHO\": {\"orcado\": 2440.0, \"realizado\": 0.0}, \"JULHO\": {\"orcado\": 2440.0, \"realizado\": 0.0}, \"AGOSTO\": {\"orcado\": 2440.0, \"realizado\": 0.0}, \"SETEMBRO\": {\"orcado\": 2440.0, \"realizado\": 0.0}, \"OUTUBRO\": {\"orcado\": 2440.0, \"realizado\": 0.0}, \"NOVEMBRO\": {\"orcado\": 2440.0, \"realizado\": 0.0}, \"DEZEMBRO\": {\"orcado\": 2440.0, \"realizado\": 0.0}}}, {\"conta\": \"LICEN\\u00c7A DE USO DE SOFTWARES\", \"agrupamento\": \"DESPESAS\", \"meses\": {\"JANEIRO\": {\"orcado\": 22538.4, \"realizado\": -33252.72}, \"FEVEREIRO\": {\"orcado\": 19538.4, \"realizado\": -36586.63}, \"MAR\\u00c7O\": {\"orcado\": 19538.4, \"realizado\": -28173.0}, \"ABRIL\": {\"orcado\": 30488.4, \"realizado\": -37764.84}, \"MAIO\": {\"orcado\": 20988.4, \"realizado\": -29683.44}, \"JUNHO\": {\"orcado\": 22988.4, \"realizado\": -34657.78}, \"JULHO\": {\"orcado\": 22988.4, \"realizado\": -40902.94}, \"AGOSTO\": {\"orcado\": 22988.4, \"realizado\": -33734.23}, \"SETEMBRO\": {\"orcado\": 22988.4, \"realizado\": -29422.58}, \"OUTUBRO\": {\"orcado\": 22988.4, \"realizado\": 0.0}, \"NOVEMBRO\": {\"orcado\": 22988.4, \"realizado\": 0.0}, \"DEZEMBRO\": {\"orcado\": 73244.4, \"realizado\": 0.0}}}, {\"conta\": \"MANUTEN\\u00c7\\u00c3O DE IM\\u00d3VEIS\", \"agrupamento\": \"DESPESAS\", \"meses\": {\"JANEIRO\": {\"orcado\": 0.0, \"realizado\": -3580.6}, \"FEVEREIRO\": {\"orcado\": 0.0, \"realizado\": -3580.6}, \"MAR\\u00c7O\": {\"orcado\": 0.0, \"realizado\": -3729.0}, \"ABRIL\": {\"orcado\": 0.0, \"realizado\": -3558.34}, \"MAIO\": {\"orcado\": 0.0, \"realizado\": -3580.6}, \"JUNHO\": {\"orcado\": 0.0, \"realizado\": -3729.0}, \"JULHO\": {\"orcado\": 0.0, \"realizado\": -3630.6}, \"AGOSTO\": {\"orcado\": 0.0, \"realizado\": -3479.0}, \"SETEMBRO\": {\"orcado\": 0.0, \"realizado\": -3443.86}, \"OUTUBRO\": {\"orcado\": 0.0, \"realizado\": 0.0}, \"NOVEMBRO\": {\"orcado\": 0.0, \"realizado\": 0.0}, \"DEZEMBRO\": {\"orcado\": 0.0, \"realizado\": 0.0}}}, {\"conta\": \"OUTRAS DESPESAS ADMINISTRATIVAS (ADM)\", \"agrupamento\": \"DESPESAS\", \"meses\": {\"JANEIRO\": {\"orcado\": 14634.0, \"realizado\": -777.65}, \"FEVEREIRO\": {\"orcado\": 14634.0, \"realizado\": -1788.01}, \"MAR\\u00c7O\": {\"orcado\": 14634.0, \"realizado\": -1319.86}, \"ABRIL\": {\"orcado\": 14634.0, \"realizado\": -1688.01}, \"MAIO\": {\"orcado\": 14634.0, \"realizado\": -487.2}, \"JUNHO\": {\"orcado\": 14634.0, \"realizado\": -339.75}, \"JULHO\": {\"orcado\": 14634.0, \"realizado\": -339.75}, \"AGOSTO\": {\"orcado\": 14634.0, \"realizado\": -339.75}, \"SETEMBRO\": {\"orcado\": 14634.0, \"realizado\": -151.96}, \"OUTUBRO\": {\"orcado\": 14634.0, \"realizado\": 0.0}, \"NOVEMBRO\": {\"orcado\": 14634.0, \"realizado\": 0.0}, \"DEZEMBRO\": {\"orcado\": 14634.0, \"realizado\": 0.0}}}, {\"conta\": \"PREMIA\\u00c7\\u00c3O\", \"agrupamento\": \"DESPESAS\", \"meses\": {\"JANEIRO\": {\"orcado\": 27000.0, \"realizado\": 0.0}, \"FEVEREIRO\": {\"orcado\": 27000.0, \"realizado\": 0.0}, \"MAR\\u00c7O\": {\"orcado\": 27000.0, \"realizado\": -1500.0}, \"ABRIL\": {\"orcado\": 22000.0, \"realizado\": 0.0}, \"MAIO\": {\"orcado\": 22000.0, \"realizado\": 0.0}, \"JUNHO\": {\"orcado\": 22000.0, \"realizado\": -1303.0}, \"JULHO\": {\"orcado\": 22000.0, \"realizado\": -3000.0}, \"AGOSTO\": {\"orcado\": 22000.0, \"realizado\": 0.0}, \"SETEMBRO\": {\"orcado\": 22000.0, \"realizado\": 0.0}, \"OUTUBRO\": {\"orcado\": 22000.0, \"realizado\": 0.0}, \"NOVEMBRO\": {\"orcado\": 22000.0, \"realizado\": 0.0}, \"DEZEMBRO\": {\"orcado\": 22000.0, \"realizado\": 0.0}}}, {\"conta\": \"SERVI\\u00c7OS APOIO ADMINISTRATIVO\", \"agrupamento\": \"DESPESAS\", \"meses\": {\"JANEIRO\": {\"orcado\": 2571.65, \"realizado\": -5131.36}, \"FEVEREIRO\": {\"orcado\": 4640.56, \"realizado\": -3165.76}, \"MAR\\u00c7O\": {\"orcado\": 3606.11, \"realizado\": -7011.49}, \"ABRIL\": {\"orcado\": 3606.11, \"realizado\": -9293.57}, \"MAIO\": {\"orcado\": 3606.11, \"realizado\": -2367.22}, \"JUNHO\": {\"orcado\": 3606.11, \"realizado\": -22584.03}, \"JULHO\": {\"orcado\": 3606.11, \"realizado\": -14787.06}, \"AGOSTO\": {\"orcado\": 3606.11, \"realizado\": -3153.76}, \"SETEMBRO\": {\"orcado\": 3606.11, \"realizado\": -2855.98}, \"OUTUBRO\": {\"orcado\": 3606.11, \"realizado\": 0.0}, \"NOVEMBRO\": {\"orcado\": 3606.11, \"realizado\": 0.0}, \"DEZEMBRO\": {\"orcado\": 3606.11, \"realizado\": 0.0}}}, {\"conta\": \"TELEFONE\", \"agrupamento\": \"DESPESAS\", \"meses\": {\"JANEIRO\": {\"orcado\": 6577.13, \"realizado\": -513.79}, \"FEVEREIRO\": {\"orcado\": 6577.13, \"realizado\": -519.14}, \"MAR\\u00c7O\": {\"orcado\": 6577.13, \"realizado\": -501.77}, \"ABRIL\": {\"orcado\": 6577.13, \"realizado\": -502.8}, \"MAIO\": {\"orcado\": 6577.13, \"realizado\": -507.6}, \"JUNHO\": {\"orcado\": 6577.13, \"realizado\": -513.7}, \"JULHO\": {\"orcado\": 6577.13, \"realizado\": -513.49}, \"AGOSTO\": {\"orcado\": 6577.13, \"realizado\": -513.36}, \"SETEMBRO\": {\"orcado\": 6577.13, \"realizado\": -338.77}, \"OUTUBRO\": {\"orcado\": 6577.13, \"realizado\": 0.0}, \"NOVEMBRO\": {\"orcado\": 6577.13, \"realizado\": 0.0}, \"DEZEMBRO\": {\"orcado\": 6577.13, \"realizado\": 0.0}}}], \"month_totals\": {\"JANEIRO\": {\"orcado\": 302872.9, \"realizado\": -98500.95}, \"FEVEREIRO\": {\"orcado\": 268226.54, \"realizado\": -88643.5}, \"MAR\\u00c7O\": {\"orcado\": 270975.9, \"realizado\": -93960.23}, \"ABRIL\": {\"orcado\": 257671.66, \"realizado\": -87363.96}, \"MAIO\": {\"orcado\": 257659.67, \"realizado\": -73255.98}, \"JUNHO\": {\"orcado\": 239976.84, \"realizado\": -103610.45}, \"JULHO\": {\"orcado\": 238113.84, \"realizado\": -100699.26}, \"AGOSTO\": {\"orcado\": 257010.38, \"realizado\": -89591.06}, \"SETEMBRO\": {\"orcado\": 218520.25, \"realizado\": -55666.0}, \"OUTUBRO\": {\"orcado\": 218224.07, \"realizado\": -680.0}, \"NOVEMBRO\": {\"orcado\": 226195.38, \"realizado\": -680.0}, \"DEZEMBRO\": {\"orcado\": 285495.21, \"realizado\": -680.0}}, \"month_order\": [\"JANEIRO\", \"FEVEREIRO\", \"MAR\\u00c7O\", \"ABRIL\", \"MAIO\", \"JUNHO\", \"JULHO\", \"AGOSTO\", \"SETEMBRO\", \"OUTUBRO\", \"NOVEMBRO\", \"DEZEMBRO\"]}");
+var sel='AGOSTO';
+
+function setStatus(cls,msg){document.getElementById('statusDot').className='dot '+cls;document.getElementById('statusText').textContent=msg;}
+
+function parseCSV(text){
+  var lines=text.split(/?
+/);if(lines.length<2)return[];
+  var rows=[];
+  for(var i=1;i<lines.length;i++){
+    var line=lines[i].trim();if(!line)continue;
+    if(line.charAt(0)==='"'&&line.charAt(line.length-1)==='"')line=line.slice(1,-1);
+    line=line.replace(/""/g,'§');
+    var parts=line.split(',');if(parts.length<5)continue;
+    var rel=parts[0].replace(/§/g,'"').trim();
+    var mes=parts[1].replace(/§/g,'"').trim();
+    var grp=parts[2].replace(/§/g,'"').trim();
+    var conta=parts[3].replace(/§/g,'"').trim();
+    var vr=parts.slice(4).join(',').replace(/§/g,'"').replace(/"/g,'').trim();
+    var val=0;
+    if(vr.indexOf(',')>=0&&vr.indexOf('.')>=0)val=parseFloat(vr.replace(/\./g,'').replace(',','.'))||0;
+    else if(vr.indexOf(',')>=0)val=parseFloat(vr.replace(',','.'))||0;
+    else val=parseFloat(vr)||0;
+    rows.push({rel:rel,mes:mes,grp:grp,conta:conta,val:val});
+  }
+  return rows;
+}
+
+function buildData(rows){
+  var lmap={};var mt={};
+  MONTHS.forEach(function(m){mt[m]={orcado:0,realizado:0};});
+  rows.forEach(function(r){
+    var tipo=r.rel.toUpperCase();var mes=r.mes.toUpperCase();
+    var grp=r.grp.toUpperCase()||'DESPESAS';var conta=r.conta;var val=r.val;
+    if(!conta||tipo.indexOf('---')>=0||MONTHS.indexOf(mes)<0)return;
+    if(!lmap[conta]){lmap[conta]={conta:conta,agrupamento:grp,meses:{}};MONTHS.forEach(function(m){lmap[conta].meses[m]={orcado:0,realizado:0};});}
+    var isOrc=tipo.indexOf('FORE')>=0||tipo.indexOf('ORC')>=0;
+    var isReal=tipo.indexOf('REAL')>=0;
+    if(isOrc){lmap[conta].meses[mes].orcado+=val;mt[mes].orcado+=val;}
+    else if(isReal){lmap[conta].meses[mes].realizado+=val;mt[mes].realizado+=val;}
+  });
+  return{lines:Object.values(lmap).sort(function(a,b){return a.conta.localeCompare(b.conta,'pt-BR');}),month_totals:mt,month_order:MONTHS};
+}
+
+function atualizarDoSheets(){
+  setStatus('loading','Buscando dados do Sheets...');
+  fetch(SHEETS_URL+'&t='+Date.now(),{cache:'no-store'})
+    .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.text();})
+    .then(function(text){
+      var rows=parseCSV(text);if(rows.length===0)throw new Error('CSV vazio');
+      var nd=buildData(rows);if(nd.lines.length===0)throw new Error('Sem linhas');
+      DATA=nd;setStatus('ok','Sheets · '+new Date().toLocaleTimeString('pt-BR'));
+      renderAll();
+    }).catch(function(e){setStatus('warn','Sheets indisponível · dados locais');console.error(e);});
+}
+
+function fmt(v,sign){
+  if(v===0)return'<span class="val-zero">—</span>';
+  var a=Math.abs(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+  return(sign?(v>0?'+':'-'):'')+'R$ '+a;
+}
+function fmtK(v){var a=Math.abs(v);if(a>=1e6)return(v<0?'-':'')+'R$ '+(a/1e6).toFixed(1)+'M';if(a>=1e3)return(v<0?'-':'')+'R$ '+(a/1e3).toFixed(0)+'k';return(v<0?'-':'')+'R$ '+a.toFixed(0);}
+function fmtRaw(v,sign){if(v===0)return'—';var a=Math.abs(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});return(sign?(v>0?'+':'-'):'')+'R$ '+a;}
+
+function renderAll(){renderStrip();renderTable();renderSaldo();}
+
+function renderStrip(){
+  var s=document.getElementById('monthStrip');s.innerHTML='';
+  MONTHS.forEach(function(m){
+    var mt=DATA.month_totals[m];var isFut=COM_REAL.indexOf(m)<0;
+    var rA=Math.abs(mt.realizado);var saldo=mt.orcado-rA;
+    var pct=mt.orcado>0?Math.round(rA/mt.orcado*100):0;
+    var sCls=saldo>=0?'val-pos':'val-neg';
+    var t=document.createElement('div');
+    t.className='month-tab'+(m===sel?' active':'')+(isFut?' future':'');
+    t.innerHTML='<div class="mtname">'+m.slice(0,3)+'</div><div class="mtsaldo '+sCls+'">'+fmtK(saldo)+'</div><div class="mtpct">'+(isFut?'previsto':pct+'% util.')+'</div>';
+    t.onclick=(function(mm){return function(){sel=mm;renderAll();}})(m);
+    s.appendChild(t);
+  });
+}
+
+function renderTable(){
+  if(!DATA)return;
+  var grpF=document.getElementById('filterGroup').value;
+  var srch=document.getElementById('searchInput').value.toLowerCase();
+  var actF=document.getElementById('showOnlyActive').checked;
+  var m=sel;var isFut=COM_REAL.indexOf(m)<0;
+  var lines=DATA.lines.filter(function(l){
+    if(grpF&&l.agrupamento!==grpF)return false;
+    if(srch&&l.conta.toLowerCase().indexOf(srch)<0)return false;
+    if(actF){var mv=l.meses[m];if(!mv||(mv.orcado===0&&mv.realizado===0))return false;}
+    return true;
+  });
+  var groups={};lines.forEach(function(l){if(!groups[l.agrupamento])groups[l.agrupamento]=[];groups[l.agrupamento].push(l);});
+  var cols=isFut?2:5;
+  var h='<thead><tr><th>Conta</th><th>Forecast</th>'+(isFut?'':'<th>Realizado</th><th>Saldo</th><th>% Util.</th>')+'</tr></thead><tbody>';
+  var totOrc=0,totReal=0;
+  ['COMISSÕES','DESPESAS','FOLHA'].forEach(function(grp){
+    if(!groups[grp])return;
+    h+='<tr class="row-group"><td colspan="'+cols+'">'+grp+'</td></tr>';
+    groups[grp].forEach(function(l){
+      var mv=l.meses[m]||{orcado:0,realizado:0};
+      var orc=mv.orcado;var real=mv.realizado;var rA=Math.abs(real);
+      var saldo=orc-rA;var pct=orc>0?rA/orc:(rA>0?99:0);
+      totOrc+=orc;totReal+=rA;
+      var sCls='val-zero';var tag='';
+      if(!isFut&&real!==0){
+        if(saldo<0){sCls='val-neg';tag='<span class="tag tag-estouro">ESTOURO</span>';}
+        else if(pct>0.85){sCls='val-warn';tag='<span class="tag tag-atencao">ATENÇÃO</span>';}
+        else sCls='val-pos';
+      }
+      h+='<tr><td>'+l.conta+tag+'</td><td>'+fmt(orc,false)+'</td>';
+      if(!isFut){
+        h+='<td>'+fmt(rA,false)+'</td>';
+        h+='<td><span class="'+sCls+'">'+fmtRaw(saldo,true)+'</span></td>';
+        h+='<td><span class="'+sCls+'">'+(real===0?'—':(pct>9?'>999':Math.round(pct*100))+'%')+'</span></td>';
+      }
+      h+='</tr>';
+    });
+  });
+  var totS=totOrc-totReal;var sCls2=totS>=0?'val-pos':'val-neg';
+  h+='<tr class="row-total"><td>TOTAL GERAL</td><td>'+fmt(totOrc,false)+'</td>';
+  if(!isFut){var pT=totOrc>0?Math.round(totReal/totOrc*100):0;h+='<td>'+fmt(totReal,false)+'</td><td><span class="'+sCls2+'">'+fmtRaw(totS,true)+'</span></td><td><span class="'+sCls2+'">'+pT+'%</span></td>';}
+  h+='</tr></tbody>';
+  document.getElementById('budgetTable').innerHTML=h;
+}
+
+function renderSaldo(){
+  if(!DATA)return;
+  var m=sel;var mt=DATA.month_totals[m];
+  var isFut=COM_REAL.indexOf(m)<0;var rA=Math.abs(mt.realizado);
+  var saldo=mt.orcado-rA;var pct=mt.orcado>0?rA/mt.orcado:0;var sCls=saldo>=0?'val-pos':'val-neg';
+  var ld=DATA.lines.map(function(l){var mv=l.meses[m]||{orcado:0,realizado:0};var r=Math.abs(mv.realizado);return{conta:l.conta,saldo:mv.orcado-r,pct:mv.orcado>0?r/mv.orcado:(r>0?99:0),hasR:mv.realizado!==0};});
+  var excess=ld.filter(function(l){return l.saldo<0&&l.hasR;}).sort(function(a,b){return a.saldo-b.saldo;}).slice(0,5);
+  var econ=ld.filter(function(l){return l.saldo>0&&l.hasR;}).sort(function(a,b){return b.saldo-a.saldo;}).slice(0,5);
+  var ytdO=COM_REAL.reduce(function(s,x){return s+DATA.month_totals[x].orcado;},0);
+  var ytdR=COM_REAL.reduce(function(s,x){return s+Math.abs(DATA.month_totals[x].realizado);},0);
+  var ytdS=ytdO-ytdR;
+  var best=COM_REAL.map(function(x){return{m:x,s:DATA.month_totals[x].orcado-Math.abs(DATA.month_totals[x].realizado)};}). sort(function(a,b){return b.s-a.s;})[0];
+  var worst=COM_REAL.map(function(x){return{m:x,s:DATA.month_totals[x].orcado-Math.abs(DATA.month_totals[x].realizado)};}). sort(function(a,b){return a.s-b.s;})[0];
+
+  var h='<div class="saldo-hdr"><div class="saldo-hdr-title">Saldo — '+m+'</div><div class="saldo-hdr-sub">'+(isFut?'Sem realizado ainda':'Período encerrado')+'</div></div>';
+
+  if(isFut){
+    h+='<div class="saldo-big"><div class="sb-label">Forecast Previsto</div><div class="sb-value val-pos">'+fmtRaw(mt.orcado,false)+'</div><div style="font-size:11px;color:var(--muted);margin-top:8px;">Nenhum realizado registrado.</div></div>';
+  } else {
+    h+='<div class="saldo-big">';
+    h+='<div class="sb-label">Saldo do Mês</div>';
+    h+='<div class="sb-value '+sCls+'">'+fmtRaw(saldo,false)+'</div>';
+    h+='<div class="sb-row"><span>Forecast</span><strong>'+fmtRaw(mt.orcado,false)+'</strong></div>';
+    h+='<div class="sb-row"><span>Realizado</span><strong>'+fmtRaw(rA,false)+'</strong></div>';
+    h+='<div class="sb-row"><span>Utilização</span><strong class="'+sCls+'">'+Math.round(pct*100)+'%</strong></div>';
+    h+='</div>';
+    h+='<div class="kpi-row">';
+    h+='<div class="kpi"><div class="kpi-label">YTD Forecast</div><div class="kpi-val">'+fmtK(ytdO)+'</div></div>';
+    h+='<div class="kpi"><div class="kpi-label">YTD Real.</div><div class="kpi-val">'+fmtK(ytdR)+'</div></div>';
+    h+='<div class="kpi"><div class="kpi-label">YTD Saldo</div><div class="kpi-val '+(ytdS>=0?'val-pos':'val-neg')+'">'+fmtK(ytdS)+'</div></div>';
+    h+='</div>';
+    if(excess.length){
+      h+='<div class="section-title">&#128308; Maiores Estouros</div>';
+      excess.forEach(function(l){
+        var bw=Math.min(100,Math.round(l.pct*100));
+        h+='<div class="detail-item"><div style="flex:1"><div class="di-name">'+l.conta+'</div><div class="di-bar-wrap"><div class="di-bar" style="width:'+bw+'%;background:var(--red)"></div></div></div><div class="di-meta"><div class="di-val val-neg">'+fmtRaw(l.saldo,false)+'</div><div class="di-pct">'+Math.round(l.pct*100)+'%</div></div></div>';
+      });
+    }
+    if(econ.length){
+      h+='<div class="section-title">&#128994; Maiores Economias</div>';
+      econ.forEach(function(l){
+        var bw=Math.min(100,Math.round(l.pct*100));
+        h+='<div class="detail-item"><div style="flex:1"><div class="di-name">'+l.conta+'</div><div class="di-bar-wrap"><div class="di-bar" style="width:'+bw+'%;background:var(--green)"></div></div></div><div class="di-meta"><div class="di-val val-pos">'+fmtRaw(l.saldo,false)+'</div><div class="di-pct">'+Math.round(l.pct*100)+'%</div></div></div>';
+      });
+    }
+  }
+  h+='<div class="insight-box"><div class="ib-title">Análise do Ano</div>';
+  h+='<div class="ib-item">Melhor mês: <strong>'+best.m+'</strong> ('+fmtRaw(best.s,false)+')</div>';
+  h+='<div class="ib-item">Pior mês: <strong>'+worst.m+'</strong> ('+fmtRaw(worst.s,false)+')</div>';
+  h+='<div class="ib-item">YTD: '+(ytdS>=0?'<strong class="val-pos">dentro do forecast</strong>':'<strong class="val-neg">acima do forecast</strong>')+' em <strong>'+fmtRaw(Math.abs(ytdS),false)+'</strong></div></div>';
+  document.getElementById('saldoPanel').innerHTML=h;
+}
+
+function openHelp(){alert('GUIA DE USO
+
+1. Edite os valores no Google Sheets (Forecast ou Realizado)
+2. Clique em Atualizar do Sheets no topo
+3. Os dados serão atualizados automaticamente
+
+Convenção:
+- Forecast = orçamento revisado 2026
+- Realizado = valores gastos
+- Saldo positivo = economia
+- Saldo negativo = estouro');}
+
+setStatus('ok','Dados locais carregados');
+renderAll();
+atualizarDoSheets();
+</script>
+</body>
+</html>
